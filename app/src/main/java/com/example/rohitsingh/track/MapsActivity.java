@@ -9,6 +9,7 @@ import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,14 +18,21 @@ import android.app.Service;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,15 +40,72 @@ import java.util.Locale;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback  {
 
     private GoogleMap mMap;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
     Button b_1;
+    Button restart;
     TextView tv_1;
     public double latitude;
     public double longitude;
     TextView adrs ;
+    TextView address;
+    TextView address2;
+    TextView address3;
+    double lon;
+    double lat;
+    String time;
 
 
 
 
+    public class User{
+        public double Lat;
+        public double Lon;
+        public String time;
+        public String ip;
+
+        public double getLat() {
+            return Lat;
+        }
+
+        public void setLat(double lat) {
+            Lat = lat;
+        }
+
+        public double getLon() {
+            return Lon;
+        }
+
+        public void setLon(double lon) {
+            Lon = lon;
+        }
+
+        public String getIp() {
+            return ip;
+        }
+
+        public void setIp(String ip) {
+            this.ip = ip;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public void setTime(String time) {
+            this.time = time;
+        }
+
+        public User(double lat, double lon, String time, String ip) {
+            Lat = lat;
+            Lon = lon;
+            this.time = time;
+            this.ip = ip;
+        }
+
+        public User() {
+        }
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,9 +117,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         b_1 = (Button)findViewById(R.id.b_1);
+        restart=(Button)findViewById(R.id.restart);
         tv_1 = (TextView)findViewById(R.id.tv_1);
+        address=(TextView)findViewById(R.id.address);
+        address2=(TextView)findViewById(R.id.address2);
+        address3=(TextView)findViewById(R.id.address3);
+
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+
+
+                final DatabaseReference mchildlat =  databaseReference.child("User 1").child("Lat");
+                mchildlat.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                          lat = dataSnapshot.getValue(double.class);
+                        address2.setText("latitude\n"+ lat);
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w("loadPost:onCancelled", databaseError.toException());
+                        Toast.makeText(MapsActivity.this,"no work",Toast.LENGTH_LONG).show();
+
+                    }
+
+
+                });
+        final DatabaseReference mchildlon =  databaseReference.child("User 1").child("Lon");
+        mchildlon.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                 lon = dataSnapshot.getValue(double.class);
+
+                address3.setText("longitude "+ lon);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("loadPost:onCancelled", databaseError.toException());
+                Toast.makeText(MapsActivity.this,"no work",Toast.LENGTH_LONG).show();
+
+            }
+
+
+        });
+
+        final DatabaseReference mchildtime =  databaseReference.child("User 1").child("Time");
+        mchildtime.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                 time = dataSnapshot.getValue(String.class);
+
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("loadPost:onCancelled", databaseError.toException());
+                Toast.makeText(MapsActivity.this,"no work",Toast.LENGTH_LONG).show();
+
+            }
+
+
+        });
+
+        restart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = getBaseContext().getPackageManager()
+                        .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+            }
+        });
+
 
     }
+
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
@@ -66,7 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final Marker[] marker = new Marker[1];
 
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        /*mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                  latitude = latLng.latitude;
@@ -78,6 +222,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 tv_1.setText("lat= "+latitude+"  lon= "+longitude);
                marker[0] = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)).title("My Location").draggable(true).visible(true));
+                LatLng sydney = new LatLng(latitude, longitude);
+                mMap.addMarker(new MarkerOptions().position(sydney).title(time));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
                 try {
                     diplay_address(latitude,longitude);
@@ -87,17 +234,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
             }
-        });
+        });*/
 
         b_1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (marker[0] != null) {
                     marker[0].remove();
                 }
+                LatLng sydney = new LatLng(lat, lon);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
                 marker[0] = mMap.addMarker(new MarkerOptions()
                         .position(
-                                new LatLng(19,77)).title("My Location").visible(true));
+                                new LatLng(lat,lon)).title(time).visible(true));
 
             }
         });

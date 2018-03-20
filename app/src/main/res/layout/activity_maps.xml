@@ -12,6 +12,28 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/map"
         android:gravity="center"
+        android:text="address"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/address2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/address"
+        android:layout_marginStart="17dp"
+        android:gravity="center"
+        android:text="jgvvh"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/address3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/restart"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="18dp"
+        android:gravity="center"
         android:text="jgvvh"
         android:textAlignment="center" />
 
@@ -20,24 +42,34 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="450dp"
-        android:layout_marginEnd="8dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         tools:context="com.example.rohitsingh.track.MapsActivity" />
 
     <Button
         android:id="@+id/b_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/map"
-        android:layout_below="@+id/address"
-        android:text="Button" />
+
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/address2"
+        android:text="location" />
 
     <TextView
         android:id="@+id/tv_1"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/address"
+        android:layout_centerHorizontal="true"
+        android:text="TextView"
+        android:textAlignment="textStart" />
+
+    <Button
+        android:id="@+id/restart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/address"
-        android:layout_marginStart="63dp"
-        android:text="TextView" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/b_1"
+        android:text="Fetch Location" />
 
 </android.widget.RelativeLayout>
